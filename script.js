@@ -1,3 +1,44 @@
+// Theme Configuration
+const themes = {
+    nature: {
+        paddleColor: '#71b280',
+        ballColor: '#e8c547',
+        ballGlow: 'rgba(232, 197, 71, 0.8)',
+        centerLineColor: 'rgba(255, 255, 255, 0.2)',
+        accentColor: '#71b280'
+    },
+    futuristic: {
+        paddleColor: '#00d4ff',
+        ballColor: '#00ff88',
+        ballGlow: 'rgba(0, 255, 136, 0.8)',
+        centerLineColor: 'rgba(0, 212, 255, 0.2)',
+        accentColor: '#00d4ff'
+    },
+    neon: {
+        paddleColor: '#ff00ff',
+        ballColor: '#00ff00',
+        ballGlow: 'rgba(0, 255, 0, 0.8)',
+        centerLineColor: 'rgba(255, 0, 255, 0.2)',
+        accentColor: '#ff00ff'
+    },
+    city: {
+        paddleColor: '#ffaa00',
+        ballColor: '#ff6b35',
+        ballGlow: 'rgba(255, 107, 53, 0.8)',
+        centerLineColor: 'rgba(255, 255, 255, 0.15)',
+        accentColor: '#ffaa00'
+    },
+    medieval: {
+        paddleColor: '#d4af37',
+        ballColor: '#c41e3a',
+        ballGlow: 'rgba(196, 30, 58, 0.8)',
+        centerLineColor: 'rgba(212, 175, 55, 0.2)',
+        accentColor: '#d4af37'
+    }
+};
+
+let currentTheme = 'futuristic';
+
 // Canvas and context
 const canvas = document.getElementById('pongCanvas');
 const ctx = canvas.getContext('2d');
@@ -40,7 +81,83 @@ const ball = {
 };
 
 let gameOver = false;
+let gamePaused = false;
 let mouseY = canvas.height / 2;
+
+// Initialize theme selection
+function initThemeSelection() {
+    const savedTheme = localStorage.getItem('pongTheme');
+    if (savedTheme && themes[savedTheme]) {
+        currentTheme = savedTheme;
+    }
+    
+    const themeButtons = document.querySelectorAll('[data-theme]');
+    const startGameBtn = document.getElementById('startGameBtn');
+    
+    themeButtons.forEach(btn => {
+        if (btn.dataset.theme === currentTheme) {
+            btn.classList.add('active');
+            startGameBtn.disabled = false;
+        }
+        
+        btn.addEventListener('click', () => {
+            themeButtons.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentTheme = btn.dataset.theme;
+            startGameBtn.disabled = false;
+            applyTheme();
+        });
+    });
+    
+    startGameBtn.addEventListener('click', () => {
+        localStorage.setItem('pongTheme', currentTheme);
+        startGame();
+    });
+    
+    // Apply saved theme initially
+    applyTheme();
+}
+
+function applyTheme() {
+    document.body.className = '';
+    document.body.classList.add(`theme-${currentTheme}`);
+}
+
+function startGame() {
+    document.getElementById('themeModal').classList.remove('theme-modal-visible');
+    document.getElementById('themeModal').classList.add('theme-modal-hidden');
+    document.getElementById('gameContainer').style.display = 'block';
+    setupGameControls();
+}
+
+function setupGameControls() {
+    const pauseBtn = document.getElementById('pauseBtn');
+    const stopBtn = document.getElementById('stopBtn');
+    const changeThemeBtn = document.getElementById('changeThemeBtn');
+    
+    pauseBtn.addEventListener('click', togglePause);
+    stopBtn.addEventListener('click', stopGame);
+    changeThemeBtn.addEventListener('click', changeTheme);
+}
+
+function togglePause() {
+    if (gameOver) return;
+    gamePaused = !gamePaused;
+    const pauseBtn = document.getElementById('pauseBtn');
+    pauseBtn.textContent = gamePaused ? 'Resume' : 'Pause';
+    pauseBtn.classList.toggle('paused');
+}
+
+function stopGame() {
+    location.reload();
+}
+
+function changeTheme() {
+    document.getElementById('gameContainer').style.display = 'none';
+    document.getElementById('themeModal').classList.remove('theme-modal-hidden');
+    document.getElementById('themeModal').classList.add('theme-modal-visible');
+    gamePaused = false;
+}
 
 // Input handling
 document.addEventListener('mousemove', (e) => {
@@ -199,27 +316,30 @@ function checkGameOver() {
 
 // Draw functions
 function drawPaddle(paddle) {
-    ctx.fillStyle = '#00ff88';
+    const theme = themes[currentTheme];
+    ctx.fillStyle = theme.paddleColor;
     ctx.fillRect(paddle.x, paddle.y, paddle.width, paddle.height);
-    ctx.shadowColor = 'rgba(0, 255, 136, 0.5)';
+    ctx.shadowColor = theme.paddleColor;
     ctx.shadowBlur = 10;
     ctx.fillRect(paddle.x, paddle.y, paddle.width, paddle.height);
     ctx.shadowBlur = 0;
 }
 
 function drawBall() {
-    ctx.fillStyle = '#ff00ff';
+    const theme = themes[currentTheme];
+    ctx.fillStyle = theme.ballColor;
     ctx.beginPath();
     ctx.arc(ball.x, ball.y, ball.size, 0, Math.PI * 2);
     ctx.fill();
-    ctx.shadowColor = 'rgba(255, 0, 255, 0.8)';
+    ctx.shadowColor = theme.ballGlow;
     ctx.shadowBlur = 15;
     ctx.fill();
     ctx.shadowBlur = 0;
 }
 
 function drawCenterLine() {
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+    const theme = themes[currentTheme];
+    ctx.strokeStyle = theme.centerLineColor;
     ctx.setLineDash([5, 5]);
     ctx.lineWidth = 2;
     ctx.beginPath();
@@ -227,6 +347,18 @@ function drawCenterLine() {
     ctx.lineTo(canvas.width / 2, canvas.height);
     ctx.stroke();
     ctx.setLineDash([]);
+}
+
+function drawPauseOverlay() {
+    if (gamePaused) {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 40px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('PAUSED', canvas.width / 2, canvas.height / 2);
+    }
 }
 
 function draw() {
@@ -241,11 +373,14 @@ function draw() {
     drawPaddle(player);
     drawPaddle(computer);
     drawBall();
+    
+    // Draw pause overlay if paused
+    drawPauseOverlay();
 }
 
 // Main game loop
 function gameLoop() {
-    if (!gameOver) {
+    if (!gameOver && !gamePaused) {
         updatePlayerPaddle();
         updateComputerPaddle();
         updateBall();
@@ -255,6 +390,7 @@ function gameLoop() {
     requestAnimationFrame(gameLoop);
 }
 
-// Start the game
+// Initialize
+initThemeSelection();
 updateScoreDisplay();
 gameLoop();
