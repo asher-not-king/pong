@@ -7,85 +7,33 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Theme Selector Screen -->
-    <div id="themeSelector" class="theme-selector hidden">
-        <div class="theme-selector-content">
-            <h1>🎮 Pong Game</h1>
-            <p class="theme-prompt">Select a Theme to Begin</p>
-            
-            <div class="themes-grid">
-                <button class="theme-btn" data-theme="nature">
-                    <div class="theme-preview" style="background: linear-gradient(135deg, #1b3c2f 0%, #2d5016 50%, #52b788 100%);"></div>
-                    <span>🌿 Nature</span>
-                </button>
-                
-                <button class="theme-btn" data-theme="futuristic">
-                    <div class="theme-preview" style="background: linear-gradient(135deg, #0a0e27 0%, #16213e 50%, #0f3460 100%);"></div>
-                    <span>🚀 Futuristic</span>
-                </button>
-                
-                <button class="theme-btn" data-theme="neon">
-                    <div class="theme-preview" style="background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);"></div>
-                    <span>⚡ Neon</span>
-                </button>
-                
-                <button class="theme-btn" data-theme="city">
-                    <div class="theme-preview" style="background: linear-gradient(135deg, #1a1f36 0%, #2c3e50 50%, #546e7a 100%);"></div>
-                    <span>🏙️ City</span>
-                </button>
-                
-                <button class="theme-btn" data-theme="medieval">
-                    <div class="theme-preview" style="background: linear-gradient(135deg, #2d1810 0%, #5c3d2e 50%, #8b4513 100%);"></div>
-                    <span>🏰 Medieval</span>
-                </button>
+    <div class="container">
+        <h1>Pong Game</h1>
+        <div class="scoreboard">
+            <div class="score">
+                <span class="label">Player</span>
+                <span class="value" id="playerScore">0</span>
             </div>
-            
-            <button id="startGameBtn" class="start-btn" disabled>Select a Theme</button>
+            <div class="divider">|</div>
+            <div class="score">
+                <span class="label">Computer</span>
+                <span class="value" id="computerScore">0</span>
+            </div>
         </div>
-    </div>
-
-    <!-- Game Container -->
-    <div id="gameContainer" class="game-hidden">
-        <div class="container">
-            <div class="game-header">
-                <h1>Pong Game</h1>
-                <div class="theme-display">
-                    Theme: <span id="currentTheme">Nature</span>
-                </div>
-            </div>
-
-            <div class="scoreboard">
-                <div class="score">
-                    <span class="label">Player</span>
-                    <span class="value" id="playerScore">0</span>
-                </div>
-                <div class="divider">|</div>
-                <div class="score">
-                    <span class="label">Computer</span>
-                    <span class="value" id="computerScore">0</span>
-                </div>
-            </div>
-            
-            <div class="game-info">
-                <p><strong>Controls:</strong></p>
-                <p>Mouse Y-position or Arrow Keys (↑/↓) to move left paddle</p>
-                <p>First to 11 points wins!</p>
-            </div>
-            
-            <canvas id="pongCanvas" width="800" height="400"></canvas>
-            
-            <div class="controls">
-                <button id="changeThemeBtn" class="control-btn change-theme">🎨 Change Theme</button>
-                <button id="pauseBtn" class="control-btn pause-btn">⏸️ Pause</button>
-                <button id="stopBtn" class="control-btn stop-btn">⏹️ Stop</button>
-            </div>
-            
-            <div id="gameOverScreen" class="game-over-hidden">
-                <div class="game-over-content">
-                    <h2 id="gameOverText">Game Over!</h2>
-                    <p id="winnerText"></p>
-                    <button class="play-again-btn" onclick="location.reload()">Play Again</button>
-                </div>
+        
+        <div class="game-info">
+            <p><strong>Controls:</strong></p>
+            <p>Mouse Y-position or Arrow Keys (↑/↓) to move left paddle</p>
+            <p>First to 11 points wins!</p>
+        </div>
+        
+        <canvas id="pongCanvas" width="800" height="400"></canvas>
+        
+        <div id="gameOverScreen" class="game-over-hidden">
+            <div class="game-over-content">
+                <h2 id="gameOverText">Game Over!</h2>
+                <p id="winnerText"></p>
+                <button onclick="location.reload()">Play Again</button>
             </div>
         </div>
     </div>
