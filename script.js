@@ -1,110 +1,44 @@
-// ==================== THEME SYSTEM ====================
-const THEMES = {
+// Theme Configuration
+const themes = {
     nature: {
-        name: 'Nature',
-        paddleColor: '#52b788',
-        ballColor: '#ff6b6b',
-        lineColor: 'rgba(82, 183, 136, 0.3)',
-        backgroundColor: 'linear-gradient(135deg, #1b3c2f 0%, #2d5016 50%, #52b788 100%)'
+        paddleColor: '#71b280',
+        ballColor: '#e8c547',
+        ballGlow: 'rgba(232, 197, 71, 0.8)',
+        centerLineColor: 'rgba(255, 255, 255, 0.2)',
+        accentColor: '#71b280'
     },
     futuristic: {
-        name: 'Futuristic',
         paddleColor: '#00d4ff',
-        ballColor: '#ff0080',
-        lineColor: 'rgba(0, 212, 255, 0.3)',
-        backgroundColor: 'linear-gradient(135deg, #0a0e27 0%, #16213e 50%, #0f3460 100%)'
+        ballColor: '#00ff88',
+        ballGlow: 'rgba(0, 255, 136, 0.8)',
+        centerLineColor: 'rgba(0, 212, 255, 0.2)',
+        accentColor: '#00d4ff'
     },
     neon: {
-        name: 'Neon',
-        paddleColor: '#00ff00',
-        ballColor: '#ff006e',
-        lineColor: 'rgba(0, 255, 0, 0.3)',
-        backgroundColor: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%)'
+        paddleColor: '#ff00ff',
+        ballColor: '#00ff00',
+        ballGlow: 'rgba(0, 255, 0, 0.8)',
+        centerLineColor: 'rgba(255, 0, 255, 0.2)',
+        accentColor: '#ff00ff'
     },
     city: {
-        name: 'City',
-        paddleColor: '#ffb300',
-        ballColor: '#00d4ff',
-        lineColor: 'rgba(255, 179, 0, 0.3)',
-        backgroundColor: 'linear-gradient(135deg, #1a1f36 0%, #2c3e50 50%, #546e7a 100%)'
+        paddleColor: '#ffaa00',
+        ballColor: '#ff6b35',
+        ballGlow: 'rgba(255, 107, 53, 0.8)',
+        centerLineColor: 'rgba(255, 255, 255, 0.15)',
+        accentColor: '#ffaa00'
     },
     medieval: {
-        name: 'Medieval',
-        paddleColor: '#daa520',
-        ballColor: '#ff4444',
-        lineColor: 'rgba(218, 165, 32, 0.3)',
-        backgroundColor: 'linear-gradient(135deg, #2d1810 0%, #5c3d2e 50%, #8b4513 100%)'
+        paddleColor: '#d4af37',
+        ballColor: '#c41e3a',
+        ballGlow: 'rgba(196, 30, 58, 0.8)',
+        centerLineColor: 'rgba(212, 175, 55, 0.2)',
+        accentColor: '#d4af37'
     }
 };
 
-let currentTheme = 'nature';
+let currentTheme = 'futuristic';
 
-// Initialize theme from localStorage or use default
-function initializeTheme() {
-    const savedTheme = localStorage.getItem('pongTheme');
-    if (savedTheme && THEMES[savedTheme]) {
-        currentTheme = savedTheme;
-    }
-}
-
-// Apply theme to UI and game
-function applyTheme(theme) {
-    currentTheme = theme;
-    localStorage.setItem('pongTheme', theme);
-    
-    document.body.className = `theme-${theme}`;
-    document.getElementById('currentTheme').textContent = THEMES[theme].name;
-}
-
-// Theme selection event listeners
-function setupThemeSelection() {
-    const themeButtons = document.querySelectorAll('.theme-btn');
-    const startBtn = document.getElementById('startGameBtn');
-    
-    themeButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-            themeButtons.forEach(b => b.classList.remove('selected'));
-            btn.classList.add('selected');
-            applyTheme(btn.dataset.theme);
-            startBtn.disabled = false;
-            startBtn.textContent = `Start Game - ${THEMES[currentTheme].name}`;
-        });
-    });
-    
-    startBtn.addEventListener('click', () => {
-        startGame();
-    });
-}
-
-// Show theme selector
-function showThemeSelector() {
-    const themeSelector = document.getElementById('themeSelector');
-    const gameContainer = document.getElementById('gameContainer');
-    themeSelector.classList.remove('hidden');
-    gameContainer.classList.remove('game-visible');
-    gameContainer.classList.add('game-hidden');
-}
-
-// Hide theme selector and show game
-function hideThemeSelector() {
-    const themeSelector = document.getElementById('themeSelector');
-    const gameContainer = document.getElementById('gameContainer');
-    themeSelector.classList.add('hidden');
-    gameContainer.classList.remove('game-hidden');
-    gameContainer.classList.add('game-visible');
-}
-
-// Change theme button
-document.addEventListener('DOMContentLoaded', () => {
-    const changeThemeBtn = document.getElementById('changeThemeBtn');
-    if (changeThemeBtn) {
-        changeThemeBtn.addEventListener('click', () => {
-            showThemeSelector();
-        });
-    }
-});
-
-// ==================== GAME LOGIC ====================
 // Canvas and context
 const canvas = document.getElementById('pongCanvas');
 const ctx = canvas.getContext('2d');
@@ -149,6 +83,81 @@ const ball = {
 let gameOver = false;
 let gamePaused = false;
 let mouseY = canvas.height / 2;
+
+// Initialize theme selection
+function initThemeSelection() {
+    const savedTheme = localStorage.getItem('pongTheme');
+    if (savedTheme && themes[savedTheme]) {
+        currentTheme = savedTheme;
+    }
+    
+    const themeButtons = document.querySelectorAll('[data-theme]');
+    const startGameBtn = document.getElementById('startGameBtn');
+    
+    themeButtons.forEach(btn => {
+        if (btn.dataset.theme === currentTheme) {
+            btn.classList.add('active');
+            startGameBtn.disabled = false;
+        }
+        
+        btn.addEventListener('click', () => {
+            themeButtons.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentTheme = btn.dataset.theme;
+            startGameBtn.disabled = false;
+            applyTheme();
+        });
+    });
+    
+    startGameBtn.addEventListener('click', () => {
+        localStorage.setItem('pongTheme', currentTheme);
+        startGame();
+    });
+    
+    // Apply saved theme initially
+    applyTheme();
+}
+
+function applyTheme() {
+    document.body.className = '';
+    document.body.classList.add(`theme-${currentTheme}`);
+}
+
+function startGame() {
+    document.getElementById('themeModal').classList.remove('theme-modal-visible');
+    document.getElementById('themeModal').classList.add('theme-modal-hidden');
+    document.getElementById('gameContainer').style.display = 'block';
+    setupGameControls();
+}
+
+function setupGameControls() {
+    const pauseBtn = document.getElementById('pauseBtn');
+    const stopBtn = document.getElementById('stopBtn');
+    const changeThemeBtn = document.getElementById('changeThemeBtn');
+    
+    pauseBtn.addEventListener('click', togglePause);
+    stopBtn.addEventListener('click', stopGame);
+    changeThemeBtn.addEventListener('click', changeTheme);
+}
+
+function togglePause() {
+    if (gameOver) return;
+    gamePaused = !gamePaused;
+    const pauseBtn = document.getElementById('pauseBtn');
+    pauseBtn.textContent = gamePaused ? 'Resume' : 'Pause';
+    pauseBtn.classList.toggle('paused');
+}
+
+function stopGame() {
+    location.reload();
+}
+
+function changeTheme() {
+    document.getElementById('gameContainer').style.display = 'none';
+    document.getElementById('themeModal').classList.remove('theme-modal-hidden');
+    document.getElementById('themeModal').classList.add('theme-modal-visible');
+    gamePaused = false;
+}
 
 // Input handling
 document.addEventListener('mousemove', (e) => {
@@ -307,27 +316,30 @@ function checkGameOver() {
 
 // Draw functions
 function drawPaddle(paddle) {
-    ctx.fillStyle = THEMES[currentTheme].paddleColor;
+    const theme = themes[currentTheme];
+    ctx.fillStyle = theme.paddleColor;
     ctx.fillRect(paddle.x, paddle.y, paddle.width, paddle.height);
-    ctx.shadowColor = THEMES[currentTheme].paddleColor;
+    ctx.shadowColor = theme.paddleColor;
     ctx.shadowBlur = 10;
     ctx.fillRect(paddle.x, paddle.y, paddle.width, paddle.height);
     ctx.shadowBlur = 0;
 }
 
 function drawBall() {
-    ctx.fillStyle = THEMES[currentTheme].ballColor;
+    const theme = themes[currentTheme];
+    ctx.fillStyle = theme.ballColor;
     ctx.beginPath();
     ctx.arc(ball.x, ball.y, ball.size, 0, Math.PI * 2);
     ctx.fill();
-    ctx.shadowColor = THEMES[currentTheme].ballColor;
+    ctx.shadowColor = theme.ballGlow;
     ctx.shadowBlur = 15;
     ctx.fill();
     ctx.shadowBlur = 0;
 }
 
 function drawCenterLine() {
-    ctx.strokeStyle = THEMES[currentTheme].lineColor;
+    const theme = themes[currentTheme];
+    ctx.strokeStyle = theme.centerLineColor;
     ctx.setLineDash([5, 5]);
     ctx.lineWidth = 2;
     ctx.beginPath();
@@ -335,6 +347,18 @@ function drawCenterLine() {
     ctx.lineTo(canvas.width / 2, canvas.height);
     ctx.stroke();
     ctx.setLineDash([]);
+}
+
+function drawPauseOverlay() {
+    if (gamePaused) {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 40px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('PAUSED', canvas.width / 2, canvas.height / 2);
+    }
 }
 
 function draw() {
@@ -350,13 +374,8 @@ function draw() {
     drawPaddle(computer);
     drawBall();
     
-    // Draw pause indicator
-    if (gamePaused) {
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
-        ctx.font = 'bold 30px Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText('PAUSED', canvas.width / 2, canvas.height / 2);
-    }
+    // Draw pause overlay if paused
+    drawPauseOverlay();
 }
 
 // Main game loop
@@ -371,81 +390,7 @@ function gameLoop() {
     requestAnimationFrame(gameLoop);
 }
 
-// ==================== GAME CONTROLS ====================
-
-// Pause functionality
-function togglePause() {
-    if (!gameOver) {
-        gamePaused = !gamePaused;
-        const pauseBtn = document.getElementById('pauseBtn');
-        pauseBtn.textContent = gamePaused ? 'Resume' : 'Pause';
-    }
-}
-
-// Stop functionality
-function stopGame() {
-    resetGame();
-    showThemeSelector();
-}
-
-// Reset game state
-function resetGame() {
-    player.y = canvas.height / 2 - PADDLE_HEIGHT / 2;
-    computer.y = canvas.height / 2 - PADDLE_HEIGHT / 2;
-    player.score = 0;
-    computer.score = 0;
-    ball.x = canvas.width / 2;
-    ball.y = canvas.height / 2;
-    ball.speed = INITIAL_BALL_SPEED;
-    gameOver = false;
-    gamePaused = false;
-    
-    document.getElementById('pauseBtn').textContent = 'Pause';
-    document.getElementById('gameOverScreen').classList.remove('game-over-visible');
-    document.getElementById('gameOverScreen').classList.add('game-over-hidden');
-    updateScoreDisplay();
-}
-
-// Start game
-function startGame() {
-    hideThemeSelector();
-    resetGame();
-}
-
-// Setup control buttons
-document.addEventListener('DOMContentLoaded', () => {
-    const pauseBtn = document.getElementById('pauseBtn');
-    const stopBtn = document.getElementById('stopBtn');
-    
-    if (pauseBtn) {
-        pauseBtn.addEventListener('click', togglePause);
-    }
-    
-    if (stopBtn) {
-        stopBtn.addEventListener('click', stopGame);
-    }
-    
-    setupThemeSelection();
-});
-
-// ==================== INITIALIZATION ====================
-
-// Initialize on page load
-document.addEventListener('DOMContentLoaded', () => {
-    initializeTheme();
-    applyTheme(currentTheme);
-    
-    // Pre-select the current theme in the selector
-    const themeButtons = document.querySelectorAll('.theme-btn');
-    themeButtons.forEach(btn => {
-        if (btn.dataset.theme === currentTheme) {
-            btn.classList.add('selected');
-        }
-    });
-    
-    // Show theme selector initially
-    showThemeSelector();
-});
-
+// Initialize
+initThemeSelection();
 updateScoreDisplay();
 gameLoop();
